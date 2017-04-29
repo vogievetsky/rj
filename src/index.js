@@ -4,7 +4,7 @@ const fs = require('fs');
 const split = require('split');
 const cardinal = require('cardinal');
 const shell = require('shelljs');
-const CombinedStream = require('combined-stream2');
+const StreamConcat = require('stream-concat');
 const JSONStream = require('JSONStream');
 const { argvParse } = require('./argv');
 require('./prototype');
@@ -89,6 +89,7 @@ global.emit = global.e = function(thing) {
   } else {
     console.log(thing);
   }
+  return thing;
 };
 
 global.exec = shell.exec;
@@ -126,22 +127,24 @@ if (parsed['null-input']) {
   let inputs = rest.slice(1);
   if (!inputs.length) inputs = ['-'];
 
-  let inputStream = CombinedStream.create();
-  inputs.forEach((input) => {
+  let inputIndex = 0;
+  let nextStream = function() {
+    if (inputIndex === inputs.length) return null;
+    let input = inputs[inputIndex++];
     if (input === '-') {
-      inputStream.append(process.stdin);
+      return process.stdin;
     } else {
-      inputStream.append(fs.createReadStream(input));
+      return fs.createReadStream(input);
     }
-  });
+  };
 
-  if (jsonInput) {
-    inputStream
-      .pipe(JSONStream.parse())
-      .on('data', proc);
-  } else {
-    inputStream
-      .pipe(split())
-      .on('data', proc);
-  }
+  let inputStream = new StreamConcat(nextStream);
+
+  let thingStream = jsonInput ? inputStream.pipe(JSONStream.parse()) : inputStream.pipe(split());
+
+  thingStream
+    .on('data', proc)
+    .on('error', (e) => {
+      console.error(`There was an error: ${e.message}`);
+    });
 }
