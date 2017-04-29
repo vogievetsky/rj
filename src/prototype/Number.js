@@ -4,6 +4,10 @@ Number.prototype.succ = function () {
   return this + 1;
 };
 
+Number.prototype.toDate = function () {
+  return new Date(this);
+};
+
 Number.prototype.toColorPart = function () {
   return this.pad(2, 16);
 };

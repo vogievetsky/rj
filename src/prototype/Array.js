@@ -34,6 +34,30 @@ Array.prototype.last = function () {
   return this[this.length - 1];
 };
 
+Array.prototype.filterMap = function (iterator, context) {
+  iterator = makeFn(iterator);
+  let newArray = [];
+  this.forEach((value, index) => {
+    let v = iterator.call(context, value, index);
+    if (typeof v !== 'undefined') {
+      newArray.push(v);
+    }
+  });
+  return newArray;
+};
+
+Array.prototype.flatMap = function (iterator, context) {
+  iterator = makeFn(iterator);
+  let newArray = [];
+  this.forEach((value, index) => {
+    let v = iterator.call(context, value, index);
+    if (typeof v !== 'undefined') {
+      newArray = newArray.concat(v);
+    }
+  });
+  return newArray;
+};
+
 Array.prototype.sortBy = function (iterator, context) {
   iterator = makeFn(iterator);
   return this

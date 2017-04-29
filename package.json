@@ -2,7 +2,10 @@
   "name": "rj",
   "version": "0.0.3",
   "description": "a multitool",
-  "bin": "bin/rj",
+  "bin": {
+    "rj": "bin/rj",
+    "jrj": "bin/jrj"
+  },
   "main": "index.js",
   "scripts": {
     "test": "exit 0"
@@ -10,9 +13,12 @@
   "author": "Vadim Ogievetsky",
   "license": "MIT",
   "dependencies": {
+    "JSONStream": "^1.3.1",
     "cardinal": "1.0.0",
+    "combined-stream2": "^1.1.2",
+    "has-own-prop": "^1.0.0",
+    "nopt": "4.0.1",
     "shelljs": "0.7.7",
-    "split": "1.0.0",
-    "nopt": "4.0.1"
+    "split": "1.0.0"
   }
 }
