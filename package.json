@@ -1,0 +1,18 @@
+{
+  "name": "rj",
+  "version": "0.0.1",
+  "description": "a multitool",
+  "bin": "bin/rj",
+  "main": "index.js",
+  "scripts": {
+    "test": "exit 0"
+  },
+  "author": "Vadim Ogievetsky",
+  "license": "MIT",
+  "dependencies": {
+    "cardinal": "1.0.0",
+    "shelljs": "0.7.7",
+    "split": "1.0.0",
+    "nopt": "4.0.1"
+  }
+}
