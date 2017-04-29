@@ -89,6 +89,7 @@ if (argv['null-input']) {
     .pipe(split())
     .on('data', function (line) {
       if (jsonInput) {
+        if (line.trim() === '') return;
         // ToDo: try catch
         line = JSON.parse(line);
       }
