@@ -29,7 +29,8 @@ try {
       'raw-output',
       'parsable-output',
       'color-output',
-      'monochrome-output'
+      'monochrome-output',
+      'join-output'
     ],
     numbers: [
       'indent'
@@ -45,7 +46,7 @@ try {
     shorthands: {
       // a: "--ascii-output"
       // S: "--sort-keys"
-      // j: "--join-output"
+
       // e: "--exit-status"
       s: "--slurp",
       R: "--raw-input",
@@ -55,7 +56,8 @@ try {
       p: "--parsable-output",
       c: "--compact-output",
       C: "--color-output",
-      M: "--monochrome-output"
+      M: "--monochrome-output",
+      j: "--join-output"
     }
   });
 
@@ -108,13 +110,21 @@ let rawOutput = !global._full_jq_;
 if (parsed['raw-output']) rawOutput = true;
 if (parsed['parsable-output']) rawOutput = false;
 
+let terminator = '\n';
+if (parsed['join-output']) terminator = '';
+const output = (str) => {
+  process.stdout.write(str + terminator);
+};
+
 global.emit = global.e = function(thing) {
-  if (typeof thing === 'string' && rawOutput) {
-    console.log(thing);
+  const thingType = typeof thing;
+  if (thingType === 'undefined') return;
+  if (thingType === 'string' && rawOutput) {
+    output(thing);
   } else {
     let out = JSON.stringify(thing, null, indent);
     if (shouldColor) out = cardinal.highlight(out);
-    console.log(out);
+    output(out);
   }
   return thing;
 };
@@ -143,7 +153,6 @@ function proc(line) {
   } catch (e) {
     console.error(e);
   }
-  if (typeof value === 'undefined') return;
   emit(value);
 }
 
