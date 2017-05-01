@@ -42,7 +42,7 @@ try {
     shorthands: {
       "s": ["--slurp"],
       "R": ["--raw-input"],
-      "j": ["--json-input"],
+      "J": ["--json-input"],
       "n": ["--null-input"],
       "c": ["--compact-output"],
       "C": ["--color-output"],
