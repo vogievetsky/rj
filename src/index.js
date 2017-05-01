@@ -5,10 +5,10 @@ const path = require('path');
 const split = require('split');
 const cardinal = require('cardinal');
 const shell = require('shelljs');
+const _ = require('lodash');
 const StreamConcat = require('stream-concat');
 const JSONStream = require('JSONStream');
 const { argvParse } = require('./argv');
-require('./prototype');
 
 function getVersion() {
   return require('../package.json').version;
@@ -129,6 +129,7 @@ global.emit = global.e = function(thing) {
   return thing;
 };
 
+global._ = _;
 global.exec = shell.exec;
 
 if (!rest.length) {
@@ -138,18 +139,18 @@ if (!rest.length) {
 
 let fn;
 try {
-  fn = new Function('_', 'i', rest[0]);
+  fn = new Function('$', '_$', 'i', rest[0]);
 } catch (e) {
   console.log(e.message);
   process.exit(3);
 }
 
 let index = -1;
-function proc(line) {
+function proc(input) {
   index++;
   let value;
   try {
-    value = fn(line, index);
+    value = fn(input, _(input), index);
   } catch (e) {
     console.error(e);
   }

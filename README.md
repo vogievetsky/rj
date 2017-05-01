@@ -33,19 +33,21 @@ A convenience utility `jrj` is an alias for `rj --json-input --parsable-output` 
 The code you provide to rj is wrapped in a function like so:
 
 ```javascript
-function(_, i) {
+function($, _$, i) {
   /* <your code> */
 }
 ```
 
-This function is then called on every value on the incoming stream with `_` bound to the value and `i` to the index.
+This function is then called on every value on the incoming stream with `$` bound to the value, `_$` is a shortcut for `_($)`, and `i` to the index.
 Anything returned form the function will be edited on the `stdout`.
 You can also call a global function `emit` (alias `e`) to emit multiple results (or instead of the return).
+
+You can access the bundled in [lodash](https://lodash.com/docs) thought the `_` global.
 
 Here is a basic example that reads text form a file and numbers every line:
 
 ```bash
-rj 'return i + ": " + _' some_file.txt
+rj 'return i + ": " + $' some_file.txt
 ```
 
 You can affect how rj reads and writes its input and output using some command-line options:
@@ -124,12 +126,12 @@ Here are some cool examples that demonstrate the use of rj.
 ### Replace grep
 
 ```bash
-rj 'if (_.includes("lol")) return _' some_file.json
+rj 'if (_.includes("lol")) return $' some_file.json
 ```
 
 
 ### Pretty print a json file
 
 ```bash
-jrj 'e(_)' some_file.json
+jrj 'e($)' some_file.json
 ```
