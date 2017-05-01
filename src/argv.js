@@ -30,7 +30,7 @@ exports.argvParse = function(args, options) {
       let letter = m[1];
       let rest = m[2];
       if (!hasOwnProp(shorthands, letter)) throw new Error(`Unknown option -${letter}`);
-      args = shorthands[letter].concat(
+      args = shorthands[letter].split(/ +/).concat(
         rest ? [`-${rest}`] : [], // Keep rest if there is some
         tail
       );

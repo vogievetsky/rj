@@ -1,0 +1,20 @@
+rj - command line JS multi-tool [version %v]
+Usage: rj [options] <rj filter> [file...]
+Example: rj -j 'return _' myfile.json
+
+  rj is a tool for processing JSON inputs, applying the
+  given filter to its JSON text inputs and producing the
+  filter's results as JSON on standard output.
+
+  Some of the options include:
+   -c             compact instead of pretty-printed output
+   -n             use `null` as the single input value
+   -e             set the exit status code based on the output
+   -s             read (slurp) all inputs into an array apply filter to it
+   -r             output raw strings, not JSON texts
+   -R             read raw strings, not JSON texts
+   -C             colorize JSON
+   -M             monochrome (don't colorize JSON)
+   --tab          use tabs for indentation
+   --arg a v      set variable $a to value <v>
+   --argjson a v  set variable $a to JSON value <v>

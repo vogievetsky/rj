@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require('fs');
+const path = require('path');
 const split = require('split');
 const cardinal = require('cardinal');
 const shell = require('shelljs');
@@ -25,6 +26,8 @@ try {
       'null-input',
       'compact-output',
       'tab',
+      'raw-output',
+      'parsable-output',
       'color-output',
       'monochrome-output'
     ],
@@ -40,13 +43,19 @@ try {
       'argjson'
     ],
     shorthands: {
-      "s": ["--slurp"],
-      "R": ["--raw-input"],
-      "J": ["--json-input"],
-      "n": ["--null-input"],
-      "c": ["--compact-output"],
-      "C": ["--color-output"],
-      "M": ["--monochrome-output"]
+      // a: "--ascii-output"
+      // S: "--sort-keys"
+      // j: "--join-output"
+      // e: "--exit-status"
+      s: "--slurp",
+      R: "--raw-input",
+      J: "--json-input",
+      n: "--null-input",
+      r: "--raw-output",
+      p: "--parsable-output",
+      c: "--compact-output",
+      C: "--color-output",
+      M: "--monochrome-output"
     }
   });
 
@@ -58,10 +67,7 @@ try {
 }
 
 if (parsed['help']) {
-  console.log(`rj - commandline JS multitool [version ${getVersion()}]`);
-  console.log(`Usage: rj [options] <rj filter> [file...]`);
-  console.log('Example: rj -j \'return _\' myfile.json');
-  console.log('');
+  console.log(fs.readFileSync(path.resolve(__dirname, 'usage.txt'), 'utf-8').replace(/%v/g, getVersion()));
   process.exit(0);
 }
 
@@ -69,19 +75,6 @@ if (parsed['version']) {
   console.log(getVersion());
   process.exit(0);
 }
-
-let indent = 2;
-if (parsed['compact-output']) {
-  indent = null;
-} else if (parsed['tab']) {
-  indent = '\t';
-} else if (parsed['indent']) {
-  indent = parsed['indent'];
-}
-
-let shouldColor = process.stdout.isTTY;
-if (parsed['color-output']) shouldColor = true;
-if (parsed['monochrome-output']) shouldColor = false;
 
 (parsed['arg'] || []).forEach(([k, v]) => {
   global['$' + k] = v
@@ -96,13 +89,32 @@ if (parsed['monochrome-output']) shouldColor = false;
   }
 });
 
+// === Output =============================
+
+let indent = 2;
+if (parsed['compact-output']) {
+  indent = null;
+} else if (parsed['tab']) {
+  indent = '\t';
+} else if (parsed['indent']) {
+  indent = parsed['indent'];
+}
+
+let shouldColor = process.stdout.isTTY;
+if (parsed['color-output']) shouldColor = true;
+if (parsed['monochrome-output']) shouldColor = false;
+
+let rawOutput = !global._full_jq_;
+if (parsed['raw-output']) rawOutput = true;
+if (parsed['parsable-output']) rawOutput = false;
+
 global.emit = global.e = function(thing) {
-  if (typeof thing === 'object') {
+  if (typeof thing === 'string' && rawOutput) {
+    console.log(thing);
+  } else {
     let out = JSON.stringify(thing, null, indent);
     if (shouldColor) out = cardinal.highlight(out);
     console.log(out);
-  } else {
-    console.log(thing);
   }
   return thing;
 };
@@ -135,7 +147,7 @@ function proc(line) {
   emit(value);
 }
 
-let jsonInput = global._json_input_hack_;
+let jsonInput = global._full_jq_;
 if (parsed['json-input']) jsonInput = true;
 if (parsed['raw-input']) jsonInput = false;
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-global._json_input_hack_ = true;
+global._full_jq_ = true;
 require('../src');
