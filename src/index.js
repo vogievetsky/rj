@@ -20,6 +20,7 @@ try {
       'help',
       'version',
       'slurp',
+      'raw-input',
       'json-input',
       'null-input',
       'compact-output',
@@ -31,12 +32,16 @@ try {
       'indent'
     ],
     twoArgs: [
-      'arg'
+      'arg',
+      'argjson'
     ],
     multiple: [
-      'arg'
+      'arg',
+      'argjson'
     ],
     shorthands: {
+      "s": ["--slurp"],
+      "R": ["--raw-input"],
       "j": ["--json-input"],
       "n": ["--null-input"],
       "c": ["--compact-output"],
@@ -78,8 +83,18 @@ let shouldColor = process.stdout.isTTY;
 if (parsed['color-output']) shouldColor = true;
 if (parsed['monochrome-output']) shouldColor = false;
 
-(parsed['arg'] || []).forEach(([k, v]) => global[k] = v);
+(parsed['arg'] || []).forEach(([k, v]) => {
+  global['$' + k] = v
+});
 
+(parsed['argjson'] || []).forEach(([k, v]) => {
+  try {
+    global['$' + k] = JSON.parse(v);
+  } catch (e) {
+    console.error(`invalid JSON text passed to --argjson '${k}'`);
+    process.exit(2);
+  }
+});
 
 global.emit = global.e = function(thing) {
   if (typeof thing === 'object') {
@@ -120,7 +135,10 @@ function proc(line) {
   emit(value);
 }
 
-let jsonInput = parsed['json-input'] || global._json_input_hack_;
+let jsonInput = global._json_input_hack_;
+if (parsed['json-input']) jsonInput = true;
+if (parsed['raw-input']) jsonInput = false;
+
 if (parsed['null-input']) {
   proc(jsonInput ? null : '');
 } else {
