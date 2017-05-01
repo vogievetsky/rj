@@ -126,7 +126,7 @@ Here are some cool examples that demonstrate the use of rj.
 ### Replace grep
 
 ```bash
-rj 'if (_.includes("lol")) return $' some_file.json
+rj 'if ($.includes("lol")) return $' some_file.json
 ```
 
 
