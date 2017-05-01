@@ -22,8 +22,10 @@ npm i -g rj
 ```
 
 This will create two binaries `rj` and `jrj`.
-`rj` is API equivalent to `jq --raw-input` and treats input as raw text by default.
-A convenience utility `jrj` is an alias for `rj --json-input` which more like `jq`.
+
+`rj` is API equivalent to `jq --raw-input --raw-output` and treats input as raw text by default.
+
+A convenience utility `jrj` is an alias for `rj --json-input --parsable-output` which behaves more like `jq`.
 
 
 ## Usage
@@ -108,3 +110,26 @@ You can affect how rj reads and writes its input and output using some command-l
   This option passes a JSON-encoded value to the rj program as a predefined variable.
   If you run rj with `--argjson foo '{"a": 1}'`, then `$foo` is available as a global and has the value `{"a": 1}`.
 
+
+## JavaScript extension
+
+ToDo
+
+
+## Examples
+
+Here are some cool examples that demonstrate the use of rj.
+
+
+### Replace grep
+
+```bash
+rj 'if (_.includes("lol")) _' some_file.json
+```
+
+
+### Pretty print a json file
+
+```bash
+jrj 'e(_)' some_file.json
+```
