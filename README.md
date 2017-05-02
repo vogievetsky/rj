@@ -1,6 +1,7 @@
 # rj - a JavaScript multi-tool
 
 rj is a simple little command line tool and a conceptual fork of [jq](https://stedolan.github.io/jq/).
+
 rj allows you to leverage ES6 JS to write handy little command line utilities for processing text, JSON, and more. 
   
   
@@ -61,6 +62,8 @@ You can affect how rj reads and writes its input and output using some command-l
   Print a usage guide.  
 
 - `--slurp` / `-s`
+  
+  ToDo: Not working yet
   
   Instead of running the filter for each JSON object in the input, read the entire input stream into a large array and run the filter just once.
   
