@@ -88,7 +88,7 @@ You can affect how rj reads and writes its input and output using some command-l
   
 - `--tab`
   
-  Use a [tab](https://www.youtube.com/watch?v=SsoOG6ZeyUI) for each indentation level instead of spaces.
+  Use a tab for each indentation level [instead of spaces](https://www.youtube.com/watch?v=SsoOG6ZeyUI).
   
 - `--indent n`
   
