@@ -60,7 +60,10 @@ try {
       C: "--color-output",
       M: "--monochrome-output",
       j: "--join-output",
-      F: "--filter"
+      i: "--in-place", // ToDo
+      F: "--filter", // ToDo
+      B: "--before", // ToDo
+      A: "--after" // ToDo
     }
   });
 
@@ -122,6 +125,12 @@ if (parsed['join-output']) terminator = '';
 const output = (str) => {
   process.stdout.write(str + terminator);
 };
+
+process.stdout.on("error", function(error) {
+  if (error.code === "EPIPE" || error.errno === "EPIPE") {
+    process.exit(0);
+  }
+});
 
 global.emit = global.e = function(thing) {
   const thingType = typeof thing;
