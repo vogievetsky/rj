@@ -122,7 +122,8 @@ When running rj you can expect the following to be defined in context:
 
 - `$` - the current input
 - `i` - the index of the current input
-- `emit` / `e` - a function that will emit to the output, anything you return will be emitted also
+- `emit()` / `e()` - a function that will emit to the output, anything you return will be emitted also
+- `exec()` - a function that will execute the parameter synchronously
 - `_` - an instance of [lodash](lodash.com/docs/)
 - `_$` - an instance of [`_.chain`](https://lodash.com/docs#chain) wrapped `$`
 - `$foo` - for any argument `foo` you defied with `--arg` or `--argjson`
