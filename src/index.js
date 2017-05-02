@@ -8,7 +8,8 @@ const shell = require('shelljs');
 const _ = require('lodash');
 const StreamConcat = require('stream-concat');
 const JSONStream = require('JSONStream');
-const { argvParse } = require('./argv');
+const argvParse = require('./argv');
+const mkfn = require('./mkfn');
 
 function getVersion() {
   return require('../package.json').version;
@@ -30,7 +31,8 @@ try {
       'parsable-output',
       'color-output',
       'monochrome-output',
-      'join-output'
+      'join-output',
+      'filter'
     ],
     numbers: [
       'indent'
@@ -46,7 +48,7 @@ try {
     shorthands: {
       // a: "--ascii-output"
       // S: "--sort-keys"
-
+      // f: "--from-file"
       // e: "--exit-status"
       s: "--slurp",
       R: "--raw-input",
@@ -57,7 +59,8 @@ try {
       c: "--compact-output",
       C: "--color-output",
       M: "--monochrome-output",
-      j: "--join-output"
+      j: "--join-output",
+      F: "--filter"
     }
   });
 
@@ -69,7 +72,7 @@ try {
 }
 
 if (parsed['help']) {
-  console.log(fs.readFileSync(path.resolve(__dirname, 'usage.txt'), 'utf-8').replace(/%v/g, getVersion()));
+  console.log(fs.readFileSync(path.resolve(__dirname, 'usage.txt'), 'utf-8').replace(/%v%/g, getVersion()));
   process.exit(0);
 }
 
@@ -79,16 +82,20 @@ if (parsed['version']) {
 }
 
 (parsed['arg'] || []).forEach(([k, v]) => {
-  global['$' + k] = v
+  global['$' + k] = v;
+  global['_$' + k] = _.chain(v);
 });
 
 (parsed['argjson'] || []).forEach(([k, v]) => {
+  let pv;
   try {
-    global['$' + k] = JSON.parse(v);
+    pv = JSON.parse(v);
   } catch (e) {
     console.error(`invalid JSON text passed to --argjson '${k}'`);
     process.exit(2);
   }
+  global['$' + k] = pv;
+  global['_$' + k] = _.chain(pv);
 });
 
 // === Output =============================
@@ -126,31 +133,19 @@ global.emit = global.e = function(thing) {
     if (shouldColor) out = cardinal.highlight(out);
     output(out);
   }
-  return thing;
 };
 
 global._ = _;
 global.exec = shell.exec;
 
-if (!rest.length) {
-  console.log(`expecting a filter to be provided`);
-  process.exit(2);
-}
-
-let fn;
-try {
-  fn = new Function('$', '_$', 'i', rest[0]);
-} catch (e) {
-  console.log(e.message);
-  process.exit(3);
-}
+let fn = mkfn(rest[0] || '$');
 
 let index = -1;
 function proc(input) {
   index++;
   let value;
   try {
-    value = fn(input, _(input), index);
+    value = fn(input, _.chain(input), index);
   } catch (e) {
     console.error(e);
   }

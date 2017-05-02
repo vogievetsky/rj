@@ -2,7 +2,7 @@
 
 const hasOwnProp = require('has-own-prop');
 
-exports.argvParse = function(args, options) {
+module.exports = function(args, options) {
   const flags = options.flags || [];
   const numbers = options.numbers || [];
   const twoArgs = options.twoArgs || [];

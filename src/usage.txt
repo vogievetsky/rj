@@ -1,6 +1,6 @@
-rj - command line JS multi-tool [version %v]
+rj - command line JS multi-tool [version %v%]
 Usage: rj [options] <rj filter> [file...]
-Example: rj -j 'return _' myfile.json
+Example: rj -J '{ foo: $.bar }' myfile.json
 
   rj is a tool for processing JSON inputs, applying the
   given filter to its JSON text inputs and producing the

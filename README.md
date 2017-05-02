@@ -97,7 +97,7 @@ You can affect how rj reads and writes its input and output using some command-l
   
 - `--parsable-output` / `-p` and `--raw-output` / `-r`
   
-  With `--parsable-output` the emmited result will always be pparsable JSON even if a string is emitted. 
+  With `--parsable-output` the emitted result will always be parsable JSON even if a string is emitted. 
   With `--raw-output`, if the emitted result is a string then it will be written directly to standard output rather than being formatted as a JSON parsable string with quotes.
   `--raw-output` is on by default in rj and `--parsable-output` is on by default in jrj.
   
@@ -113,25 +113,47 @@ You can affect how rj reads and writes its input and output using some command-l
   If you run rj with `--argjson foo '{"a": 1}'`, then `$foo` is available as a global and has the value `{"a": 1}`.
 
 
-## JavaScript extension
+## Environment
 
-ToDo
+When running rj you can expect the following to be defined in context:
+
+- `$` - the current input
+- `i` - the index of the current input
+- `emit` / `e` - a function that will emit to the output, anything you return will be emitted also
+- `_` - an instance of [lodash](lodash.com/docs/)
+- `_$` - an instance of [`_.chain`](https://lodash.com/docs#chain) wrapped `$`
+- `$foo` - for any argument `foo` you defied with `--arg` or `--argjson`
+- `_$foo` - and instance of `_.chain($foo)` for any argument `foo` you have defined
+- The standard JS runtime objects that you would expect like `JSON` and `Math`
 
 
 ## Examples
 
-Here are some cool examples that demonstrate the use of rj.
+Here are some examples that demonstrate the use of rj.
+
+Note: any use of `jrj ...` is just a shortcut for `rj -J ...`.
 
 
-### Replace grep
+### grep
 
 ```bash
-rj 'if ($.includes("lol")) return $' some_file.json
+rj '$.includes("THE") ? $ : undefined' LICENSE
 ```
 
 
-### Pretty print a json file
+### Pretty print a JSON file
 
 ```bash
-jrj 'e($)' some_file.json
+jrj '$' test/data/edits.json
 ```
+
+This is equivalent to `jq '.' some_file.json`
+
+
+### Turn a JSON file containing an array of objects into NDJSON
+
+```bash
+jrj -c '$.forEach(e)' test/data/edits.json
+```
+
+This is equivalent to `jq -c '.[]' test/data/edits.json`
