@@ -6,11 +6,11 @@ rj allows you to leverage ES6 JS to write handy little command line utilities fo
   
 ## Why rj?
 
-I love [jq](https://stedolan.github.io/jq/) and use it daily but I after years of use I still struggle to remember the syntax for the more advanced parts of the language.
-For me writing anything but the simplest jq filter requires opening the [manual](https://stedolan.github.io/jq/manual/).
+I love [jq](https://stedolan.github.io/jq/) and use it often but after years of use I still struggle to remember the syntax for the more advanced parts of the language.
+For me writing anything but a simple jq program requires opening the [manual](https://stedolan.github.io/jq/manual/).
 This is not jq's fault.
-You need practice to get good at something and since the jq filters are so short it would take a very long time to become proficient.
-I wanted to have a tool just like jq in API (which jq nails) but with a filter syntax that is more accessible.
+You need practice to get good at something and since jq expression are so short it would take a very long time to become proficient.
+I wanted to have a tool just with jq's API (which is rock solid) but with an expression syntax that is more accessible to the JS aficionado.
 
 
 ## Installation
@@ -38,16 +38,16 @@ function($, _$, i) {
 }
 ```
 
-This function is then called on every value on the incoming stream with `$` bound to the value, `_$` is a shortcut for `_($)`, and `i` to the index.
+This function is then called on every value on the incoming stream with `$` bound to the value, and `i` to the index.
 Anything returned form the function will be edited on the `stdout`.
-You can also call a global function `emit` (alias `e`) to emit multiple results (or instead of the return).
+You can also call a global function `emit` (alias `e`) to emit multiple results.
 
 You can access the bundled in [lodash](https://lodash.com/docs) thought the `_` global.
 
 Here is a basic example that reads text form a file and numbers every line:
 
 ```bash
-rj 'return i + ": " + $' some_file.txt
+rj 'i + ": " + $' some_file.txt
 ```
 
 You can affect how rj reads and writes its input and output using some command-line options:
@@ -85,7 +85,7 @@ You can affect how rj reads and writes its input and output using some command-l
   
 - `--tab`
   
-  Use a tab for each indentation level instead of two spaces.
+  Use a [tab](https://www.youtube.com/watch?v=SsoOG6ZeyUI) for each indentation level instead of spaces.
   
 - `--indent n`
   
