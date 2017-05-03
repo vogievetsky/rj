@@ -86,7 +86,7 @@ if (parsed['version']) {
 
 (parsed['arg'] || []).forEach(([k, v]) => {
   global['$' + k] = v;
-  global['_$' + k] = _.chain(v);
+  global['_$' + k] = _(v);
 });
 
 (parsed['argjson'] || []).forEach(([k, v]) => {
@@ -98,7 +98,7 @@ if (parsed['version']) {
     process.exit(2);
   }
   global['$' + k] = pv;
-  global['_$' + k] = _.chain(pv);
+  global['_$' + k] = _(pv);
 });
 
 // === Output =============================
@@ -116,7 +116,7 @@ let shouldColor = process.stdout.isTTY;
 if (parsed['color-output']) shouldColor = true;
 if (parsed['monochrome-output']) shouldColor = false;
 
-let rawOutput = !global._full_jq_;
+let rawOutput = global._trj_mode_;
 if (parsed['raw-output']) rawOutput = true;
 if (parsed['parsable-output']) rawOutput = false;
 
@@ -154,14 +154,14 @@ function proc(input) {
   index++;
   let value;
   try {
-    value = fn(input, _.chain(input), index);
+    value = fn(input, _(input), index);
   } catch (e) {
     console.error(e);
   }
   emit(value);
 }
 
-let jsonInput = global._full_jq_;
+let jsonInput = !global._trj_mode_;
 if (parsed['json-input']) jsonInput = true;
 if (parsed['raw-input']) jsonInput = false;
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-global._full_jq_ = true;
+global._trj_mode_ = true;
 require('../src');

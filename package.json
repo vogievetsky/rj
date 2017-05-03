@@ -8,7 +8,7 @@
   "preferGlobal": true,
   "bin": {
     "rj": "bin/rj",
-    "jrj": "bin/jrj"
+    "trj": "bin/trj"
   },
   "main": "index.js",
   "scripts": {

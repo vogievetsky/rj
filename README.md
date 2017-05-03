@@ -22,11 +22,9 @@ To install rj simply make sure you have an up to date node (node >= 0.6.x) and u
 npm i -g rj
 ```
 
-This will create two binaries `rj` and `jrj`.
+This will create two binaries `rj` and `trj`.
 
-`rj` is API equivalent to `jq --raw-input --raw-output` and treats input as raw text by default.
-
-A convenience utility `jrj` is an alias for `rj --json-input --parsable-output` which behaves more like `jq`.
+`rj` is API equivalent to `jq` and `trj` treats input as raw text by default, it is an alias for `rj --raw-input --raw-output`.
 
 
 ## Usage
@@ -67,13 +65,12 @@ You can affect how rj reads and writes its input and output using some command-l
   
   Instead of running the filter for each JSON object in the input, read the entire input stream into a large array and run the filter just once.
   
-- `--json-input` / `-J` and `--raw-input` / `-R` 
+- `--raw-input` / `-R` and `--json-input` / `-J` 
   
-  With `--json-input` the input will pe parsed as JSON.
-  With `--raw-input` the input wont be parsed as JSON.
+  With `--raw-input` the input wont be parsed as JSON.  
   Instead, each line of text is passed to the function as a string.
   If combined with `--slurp`, then the entire input is passed to the filter as a single long string.
-  `--json-input` is on by default in rj and `--raw-input` is on by default in jrj.
+  `--json-input` is on by default in rj and `--raw-input` is on by default in trj.
   
 - `--null-input` / `-n`
   
@@ -98,11 +95,10 @@ You can affect how rj reads and writes its input and output using some command-l
   
   By default, rj outputs colored JSON if writing to a terminal. You can force it to produce color even if writing to a pipe or a file using -C, and disable color with -M.
   
-- `--parsable-output` / `-p` and `--raw-output` / `-r`
-  
-  With `--parsable-output` the emitted result will always be parsable JSON even if a string is emitted. 
+- `--raw-output` / `-r` / `--parsable-output` / `-p`
+   
   With `--raw-output`, if the emitted result is a string then it will be written directly to standard output rather than being formatted as a JSON parsable string with quotes.
-  `--raw-output` is on by default in rj and `--parsable-output` is on by default in jrj.
+  `--parsable-output` is on by default in rj and `--raw-output` is on by default in trj.
   
 - `--arg name value`
   
@@ -135,20 +131,18 @@ When running rj you can expect the following to be defined in context:
 
 Here are some examples that demonstrate the use of rj.
 
-Note: any use of `jrj ...` is just a shortcut for `rj -J ...`.
-
 
 ### grep
 
 ```bash
-rj '$.includes("THE") ? $ : undefined' LICENSE
+trj '$.includes("THE") ? $ : undefined' LICENSE
 ```
 
 
 ### Pretty print a JSON file
 
 ```bash
-jrj '$' test/data/edits.json
+rj '$' test/data/edits.json
 ```
 
 This is equivalent to `jq '.' some_file.json`
@@ -157,7 +151,7 @@ This is equivalent to `jq '.' some_file.json`
 ### Turn a JSON file containing an array of objects into NDJSON
 
 ```bash
-jrj -c '$.forEach(e)' test/data/edits.json
+rj -c '$.forEach(e)' test/data/edits.json
 ```
 
 This is equivalent to `jq -c '.[]' test/data/edits.json`
