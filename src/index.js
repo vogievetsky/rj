@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const split = require('split');
+const readline = require("readline");
 const cardinal = require('cardinal');
 const shell = require('shelljs');
 const _ = require('lodash');
@@ -184,11 +184,17 @@ if (parsed['null-input']) {
 
   let inputStream = new StreamConcat(nextStream);
 
-  let thingStream = jsonInput ? inputStream.pipe(JSONStream.parse()) : inputStream.pipe(split());
+  if (jsonInput) {
+    inputStream.pipe(JSONStream.parse())
+      .on('data', proc)
+      .on('error', (e) => {
+        console.error(`There was an error: ${e.message}`);
+      });
+  } else {
+    readline.createInterface({
+      input: inputStream,
+      output: null
+    }).on("line", proc);
+  }
 
-  thingStream
-    .on('data', proc)
-    .on('error', (e) => {
-      console.error(`There was an error: ${e.message}`);
-    });
 }
