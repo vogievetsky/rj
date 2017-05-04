@@ -4,6 +4,7 @@ const hasOwnProp = require('has-own-prop');
 
 module.exports = function(args, options) {
   const flags = options.flags || [];
+  const strings = options.strings || [];
   const numbers = options.numbers || [];
   const twoArgs = options.twoArgs || [];
   const multiple = options.multiple || [];
@@ -44,6 +45,11 @@ module.exports = function(args, options) {
       if (flags.includes(arg)) {
         addParsed(arg, true);
         args = tail; // Next
+
+      } else if (strings) {
+        if (!tail.length) throw new Error(`option --${arg} must have a parameter`);
+        addParsed(arg, tail[0]);
+        args = tail.slice(1); // Next
 
       } else if (numbers.includes(arg)) {
         if (!tail.length) throw new Error(`option --${arg} must have a numeric parameter`);

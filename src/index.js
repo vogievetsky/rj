@@ -8,12 +8,15 @@ const shell = require('shelljs');
 const _ = require('lodash');
 const StreamConcat = require('stream-concat');
 const JSONStream = require('JSONStream');
+const csv = require('csv-streamify');
 const argvParse = require('./argv');
 const mkfn = require('./mkfn');
 
 function getVersion() {
   return require('../package.json').version;
 }
+
+const POSSIBLE_INPUT_TYPES = ['null', 'raw', 'json', 'csv', 'tsv', 'wdlog-raw', 'wdlog'];
 
 let parsed, rest;
 try {
@@ -25,6 +28,7 @@ try {
       'raw-input',
       'json-input',
       'null-input',
+      'has-header',
       'compact-output',
       'tab',
       'raw-output',
@@ -33,6 +37,9 @@ try {
       'monochrome-output',
       'join-output',
       'filter'
+    ],
+    strings: [
+      'input'
     ],
     numbers: [
       'indent'
@@ -46,6 +53,7 @@ try {
       'argjson'
     ],
     shorthands: {
+      h: "--help",
       // a: "--ascii-output"
       // S: "--sort-keys"
       // f: "--from-file"
@@ -54,6 +62,8 @@ try {
       R: "--raw-input",
       J: "--json-input",
       n: "--null-input",
+      I: "--input",
+      H: "--has-header",
       r: "--raw-output",
       p: "--parsable-output",
       c: "--compact-output",
@@ -161,12 +171,19 @@ function proc(input) {
   emit(value);
 }
 
-let jsonInput = !global._trj_mode_;
-if (parsed['json-input']) jsonInput = true;
-if (parsed['raw-input']) jsonInput = false;
+let inputType = global._trj_mode_ ? 'raw' : 'json';
+if (parsed['null-input']) inputType = 'null';
+if (parsed['raw-input']) inputType = 'raw';
+if (parsed['json-input']) inputType = 'json';
+if (parsed['input']) inputType = parsed['input'];
 
-if (parsed['null-input']) {
-  proc(jsonInput ? null : '');
+if (!POSSIBLE_INPUT_TYPES.includes(inputType)) {
+  console.error(`unsupported --input '${k}'`);
+  process.exit(2);
+}
+
+if (inputType === 'null') {
+  proc(null);
 } else {
   let inputs = rest.slice(1);
   if (!inputs.length) inputs = ['-'];
@@ -184,17 +201,42 @@ if (parsed['null-input']) {
 
   let inputStream = new StreamConcat(nextStream);
 
-  if (jsonInput) {
-    inputStream.pipe(JSONStream.parse())
-      .on('data', proc)
-      .on('error', (e) => {
-        console.error(`There was an error: ${e.message}`);
-      });
-  } else {
+  if (inputType === 'raw') {
     readline.createInterface({
       input: inputStream,
       output: null
     }).on("line", proc);
-  }
+  } else {
+    switch (inputType) {
+      case 'json':
+        inputStream = inputStream.pipe(JSONStream.parse());
+        break;
 
+      case 'csv':
+        inputStream = inputStream.pipe(csv({
+          objectMode: true,
+          delimiter: ',',
+          columns: Boolean(parsed['has-header'])
+        }));
+        break;
+
+      case 'tsv':
+        inputStream = inputStream.pipe(csv({
+          objectMode: true,
+          delimiter: '\t',
+          columns: Boolean(parsed['has-header'])
+        }));
+        break;
+
+      default:
+        console.error(`nut yet implemented --input '${k}'`);
+        process.exit(2);
+    }
+
+    inputStream
+      .on('data', proc)
+      .on('error', (e) => {
+        console.error(`There was an error: ${e.message}`);
+      });
+  }
 }
