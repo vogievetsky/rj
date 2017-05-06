@@ -9,6 +9,7 @@ const _ = require('lodash');
 const StreamConcat = require('stream-concat');
 const JSONStream = require('JSONStream');
 const csv = require('csv-streamify');
+const sortedObject = require("sorted-object");
 const argvParse = require('./argv');
 const mkfn = require('./mkfn');
 
@@ -31,15 +32,19 @@ try {
       'has-header',
       'compact-output',
       'tab',
+      'sort-keys',
       'raw-output',
       'parsable-output',
       'color-output',
       'monochrome-output',
       'join-output',
+      'print0',
       'filter'
     ],
     strings: [
-      'input'
+      'input',
+      'where',
+      'group-by'
     ],
     numbers: [
       'indent'
@@ -55,7 +60,7 @@ try {
     shorthands: {
       h: "--help",
       // a: "--ascii-output"
-      // S: "--sort-keys"
+      S: "--sort-keys",
       // f: "--from-file"
       // e: "--exit-status"
       s: "--slurp",
@@ -71,7 +76,8 @@ try {
       M: "--monochrome-output",
       j: "--join-output",
       i: "--in-place", // ToDo
-      F: "--filter", // ToDo
+      W: "--where", // ToDo
+      G: "--group-by", // ToDo
       B: "--before", // ToDo
       A: "--after" // ToDo
     }
@@ -132,15 +138,12 @@ if (parsed['parsable-output']) rawOutput = false;
 
 let terminator = '\n';
 if (parsed['join-output']) terminator = '';
+if (parsed['print0']) terminator = '\x00';
 const output = (str) => {
   process.stdout.write(str + terminator);
 };
 
-process.stdout.on("error", function(error) {
-  if (error.code === "EPIPE" || error.errno === "EPIPE") {
-    process.exit(0);
-  }
-});
+let sortKeys = parsed['sort-keys'];
 
 global.emit = global.e = function(thing) {
   const thingType = typeof thing;
@@ -148,11 +151,20 @@ global.emit = global.e = function(thing) {
   if (thingType === 'string' && rawOutput) {
     output(thing);
   } else {
+    if (sortKeys && thing && typeof thing === 'object' && Object.prototype.toString.call(thing) === "[object Object]") {
+      thing = sortedObject(thing);
+    }
     let out = JSON.stringify(thing, null, indent);
     if (shouldColor) out = cardinal.highlight(out);
     output(out);
   }
 };
+
+process.stdout.on("error", function(error) {
+  if (error.code === "EPIPE" || error.errno === "EPIPE") {
+    process.exit(0);
+  }
+});
 
 global._ = _;
 global.exec = shell.exec;
@@ -227,6 +239,8 @@ if (inputType === 'null') {
           columns: Boolean(parsed['has-header'])
         }));
         break;
+
+      // https://www.w3.org/TR/WD-logfile.html
 
       default:
         console.error(`nut yet implemented --input '${k}'`);
