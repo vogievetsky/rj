@@ -103,4 +103,48 @@ describe('basics', () => {
     });
   });
 
+  it('--input csv --has-header', (testComplete) => {
+    exec(`bin/rj --input csv --has-header '{t: $.time, c: $.channel}' test-data/edits.csv`, (error, stdout, stderr) => {
+      expect(error).to.equal(null);
+      expect(stderr).to.equal('');
+      expect(stdout).to.equal(sane`
+        {
+          "t": "2015-09-12T00:46:58Z",
+          "c": "en"
+        }
+        {
+          "t": "2015-09-12T00:47:02Z",
+          "c": "es"
+        }
+        {
+          "t": "2015-09-12T00:47:05Z",
+          "c": "en"
+        }
+      `);
+      testComplete();
+    });
+  });
+
+  it('--input tsv --has-header', (testComplete) => {
+    exec(`bin/rj --input tsv --has-header '{t: $.time, c: $.channel}' test-data/edits.tsv`, (error, stdout, stderr) => {
+      expect(error).to.equal(null);
+      expect(stderr).to.equal('');
+      expect(stdout).to.equal(sane`
+        {
+          "t": "2015-09-12T00:46:58Z",
+          "c": "en"
+        }
+        {
+          "t": "2015-09-12T00:47:02Z",
+          "c": "es"
+        }
+        {
+          "t": "2015-09-12T00:47:05Z",
+          "c": "en"
+        }
+      `);
+      testComplete();
+    });
+  });
+
 });
