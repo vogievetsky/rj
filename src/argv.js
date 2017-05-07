@@ -46,7 +46,7 @@ module.exports = function(args, options) {
         addParsed(arg, true);
         args = tail; // Next
 
-      } else if (strings) {
+      } else if (strings.includes(arg)) {
         if (!tail.length) throw new Error(`option --${arg} must have a parameter`);
         addParsed(arg, tail[0]);
         args = tail.slice(1); // Next

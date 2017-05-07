@@ -102,7 +102,6 @@ if (parsed['version']) {
 
 (parsed['arg'] || []).forEach(([k, v]) => {
   global['$' + k] = v;
-  global['_$' + k] = _(v);
 });
 
 (parsed['argjson'] || []).forEach(([k, v]) => {
@@ -114,7 +113,6 @@ if (parsed['version']) {
     process.exit(2);
   }
   global['$' + k] = pv;
-  global['_$' + k] = _(pv);
 });
 
 // === Output =============================
@@ -125,7 +123,7 @@ if (parsed['compact-output']) {
 } else if (parsed['tab']) {
   indent = '\t';
 } else if (parsed['indent']) {
-  indent = parsed['indent'];
+  indent = Number(parsed['indent']);
 }
 
 let shouldColor = process.stdout.isTTY;
@@ -243,7 +241,7 @@ if (inputType === 'null') {
       // https://www.w3.org/TR/WD-logfile.html
 
       default:
-        console.error(`nut yet implemented --input '${k}'`);
+        console.error(`not yet implemented --input '${k}'`);
         process.exit(2);
     }
 

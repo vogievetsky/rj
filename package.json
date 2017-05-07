@@ -12,7 +12,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "exit 0"
+    "test": "mocha"
   },
   "author": "Vadim Ogievetsky",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "stream-concat": "0.1.0"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "mocha": "^3.3.0"
   }
 }
