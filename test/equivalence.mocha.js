@@ -48,6 +48,11 @@ describe('equivalence', () => {
     `bin/rj '$' test-data/edits.line.json`
   ));
 
+  it('--slurp some ndjson input', sameSame(
+    `jq --slurp '.' test-data/edits.line.json`,
+    `bin/rj --slurp '$' test-data/edits.line.json`
+  ));
+
   it('some text input --raw-input', sameSame(
     `jq --raw-input '.' test-data/two-cities.txt`,
     `bin/rj --raw-input '$' test-data/two-cities.txt`

@@ -181,6 +181,16 @@ function proc(input) {
   emit(value);
 }
 
+function slurpStream(stream) {
+  let data = [];
+  stream.on('data', (d) => {
+    data.push(d)
+  });
+  stream.on('end', () => {
+    proc(data);
+  });
+}
+
 let inputType = global._trj_mode_ ? 'raw' : 'json';
 if (parsed['null-input']) inputType = 'null';
 if (parsed['raw-input']) inputType = 'raw';
@@ -245,10 +255,14 @@ if (inputType === 'null') {
         process.exit(2);
     }
 
-    inputStream
-      .on('data', proc)
-      .on('error', (e) => {
-        console.error(`There was an error: ${e.message}`);
-      });
+    inputStream.on('error', (e) => {
+      console.error(`There was an error: ${e.message}`);
+    });
+
+    if (parsed['slurp']) {
+      slurpStream(inputStream);
+    } else {
+      inputStream.on('data', proc);
+    }
   }
 }
