@@ -59,6 +59,20 @@ describe('basics', () => {
     });
   });
 
+  it('--null-input (emit)', (testComplete) => {
+    exec(`bin/rj --null-input 'emit({ a: 1 + 2, b: "Hello" })'`, (error, stdout, stderr) => {
+      expect(error).to.equal(null);
+      expect(stderr).to.equal('');
+      expect(stdout).to.equal(sane`
+        {
+          "a": 3,
+          "b": "Hello"
+        }
+      `);
+      testComplete();
+    });
+  });
+
   it('--json-input (normal)', (testComplete) => {
     exec(`bin/rj --json-input '$.forEach(d => e({t: d.time, c: d.channel}))' test-data/edits.json`, (error, stdout, stderr) => {
       expect(error).to.equal(null);
@@ -147,4 +161,25 @@ describe('basics', () => {
     });
   });
 
+  it('use trailing ; to suppress output', (testComplete) => {
+    exec(`bin/rj --json-input '$.map(d => e({t: d.time, c: d.channel}));' test-data/edits.json`, (error, stdout, stderr) => {
+      expect(error).to.equal(null);
+      expect(stderr).to.equal('');
+      expect(stdout).to.equal(sane`
+        {
+          "t": "2015-09-12T00:46:58Z",
+          "c": "en"
+        }
+        {
+          "t": "2015-09-12T00:47:02Z",
+          "c": "es"
+        }
+        {
+          "t": "2015-09-12T00:47:05Z",
+          "c": "en"
+        }
+      `);
+      testComplete();
+    });
+  });
 });

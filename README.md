@@ -29,17 +29,10 @@ This will create two binaries `rj` and `trj`.
 
 ## Usage
 
-The code you provide to rj is wrapped in a function like so:
-
-```javascript
-function($, _$, i) {
-  /* <your code> */
-}
-```
-
-This function is then called on every value on the incoming stream with `$` bound to the value, and `i` to the index.
-Anything returned form the function will be edited on the `stdout`.
+The code you provide to rj is executed once for every entity (line or object) in the input with `$` bound to the value, and `i` to the index.
+The result of the last evaluated expression will be edited on the `stdout`.
 You can also call a global function `emit` (alias `e`) to emit multiple results.
+To prevent the value of the last expression form being automatically emitted simply terminate your script with `;`.
 
 You can access the bundled in [lodash](https://lodash.com/docs) thought the `_` global.
 
@@ -121,9 +114,8 @@ When running rj you can expect the following to be defined in context:
 - `emit()` / `e()` - a function that will emit to the output, anything you return will be emitted also
 - `exec()` - a function that will execute the parameter synchronously
 - `_` - an instance of [lodash](lodash.com/docs/)
-- `_$` - an instance of [`_.chain`](https://lodash.com/docs#chain) wrapped `$`
+- `_$` - an instance of [`_`](https://lodash.com/docs) wrapped `$`
 - `$foo` - for any argument `foo` you defied with `--arg` or `--argjson`
-- `_$foo` - and instance of `_.chain($foo)` for any argument `foo` you have defined
 - The standard JS runtime objects that you would expect like `JSON` and `Math`
 
 

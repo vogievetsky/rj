@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require("readline");
+const vm = require("vm");
 const cardinal = require('cardinal');
 const shell = require('shelljs');
 const _ = require('lodash');
@@ -100,8 +101,13 @@ if (parsed['version']) {
   process.exit(0);
 }
 
+let sandbox = {
+  _: _,
+  exec: shell.exec
+};
+
 (parsed['arg'] || []).forEach(([k, v]) => {
-  global['$' + k] = v;
+  sandbox['$' + k] = v;
 });
 
 (parsed['argjson'] || []).forEach(([k, v]) => {
@@ -112,7 +118,7 @@ if (parsed['version']) {
     console.error(`invalid JSON text passed to --argjson '${k}'`);
     process.exit(2);
   }
-  global['$' + k] = pv;
+  sandbox['$' + k] = pv;
 });
 
 // === Output =============================
@@ -143,7 +149,7 @@ const output = (str) => {
 
 let sortKeys = parsed['sort-keys'];
 
-global.emit = global.e = function(thing) {
+const emit = function(thing) {
   const thingType = typeof thing;
   if (thingType === 'undefined') return;
   if (thingType === 'string' && rawOutput) {
@@ -157,6 +163,8 @@ global.emit = global.e = function(thing) {
     output(out);
   }
 };
+sandbox.emit = emit;
+sandbox.e = emit;
 
 process.stdout.on("error", function(error) {
   if (error.code === "EPIPE" || error.errno === "EPIPE") {
@@ -164,10 +172,15 @@ process.stdout.on("error", function(error) {
   }
 });
 
-global._ = _;
-global.exec = shell.exec;
+let context = new vm.createContext(sandbox);
 
-let fn = mkfn(rest[0] || '$');
+let fn;
+try {
+  fn = mkfn(rest[0], sandbox, context);
+} catch (e) {
+  console.error(e.message);
+  process.exit(3);
+}
 
 let index = -1;
 function proc(input) {

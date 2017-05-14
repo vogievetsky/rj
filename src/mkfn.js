@@ -1,59 +1,46 @@
 "use strict";
 
+const vm = require("vm");
 const acorn  = require("acorn");
 
-// Check if this is expression is valid and if maybe a magic return should be inserted, i.e. something like `$` or `$ + 1`
-function validate(src) {
-  try { // first try to parse with `return (...)`
-    acorn.parse('function a(){return (' + src + ')}');
-    return true; // if this parses then we definitely should add a magic return
-
-  } catch (e) { // if it fails chances are src has some chars in it like `;`. Maybe it is `var a = $; return a`
-    try { // so lets try without the parens
-      const fullParse = acorn.parse('function a(){return ' + src + '}');
-
-      // ok that worked, but did we create unreachable code? Better check that there is only one return expression
-      const srcStatements = fullParse.body[0].body.body;
-      return srcStatements.length === 1 && srcStatements[0].type === 'ReturnStatement';
-
-    } catch (e) { // that failed... let's see if the vanilla src is parsable
-      try {
-        const fullParse = acorn.parse('function a(){' + src + '}');
-        const srcStatements = fullParse.body[0].body.body;
-
-        if (srcStatements.length === 1 && srcStatements[0].type === 'BlockStatement') {
-          // Oh dear... looks like we have a top level block statement.
-          // That is technically ok `function a(){{ a: 1; b: 2 }}` is valid JS (a and b are labels)
-          // But I'm willing to bet that this is not what the user intended, they were probably going for { a: 1, b: 2 }.
-          // Lets disallow this to save on confusion
-          console.log('Looks like you have a top level block statement in your code.');
-          console.log('Are you sure that is wht you want?');
-          console.log('Maybe there is a `;` that should be a `,`?');
-          process.exit(3);
-        }
-
-        return false;
-      } catch (e) {
-        // Well nothing is parsable so try to make a meaning full error
-        console.log(e.message);
-        process.exit(3);
-      }
+module.exports = function (src, sandbox, context) {
+  src = (src || '').trim();
+  let fullParse;
+  try {
+    fullParse = acorn.parse(src);
+  } catch (e) {
+    // The user may have entered `{ a: 1, b: 2 }` lets add parenthesis
+    const altSrc = '(' + src + ')';
+    try {
+      fullParse = acorn.parse(altSrc);
+      src = altSrc; // Ok that worked so stick with the parenthesis
+    } catch (e2) {
+      // This is a genuine error, lets trow the first error
+      throw e;
     }
   }
-}
 
-module.exports = function (src) {
-  const needsMagicReturn = validate(src);
-  if (needsMagicReturn) {
-    src = 'return ' + src;
+  if (fullParse.type !== 'Program' || !Array.isArray(fullParse.body)) {
+    throw new Error('something went terribly wrong trying to parse the script, please file an issue.');
   }
 
-  let fn;
-  try {
-    fn = new Function('$', '_$', 'i', src);
-  } catch (e) {
-    console.log(e.message);
-    process.exit(3);
+  const body = fullParse.body;
+  if (body.length === 0) {
+    // Empty script they just mean '$'
+    src = '$';
+  } else if (body.length === 1 && body[0].type === 'BlockStatement') {
+    // The user entered `{}` or `{ a: 1 }` lets add parenthesis
+    src = '(' + src + ')';
   }
-  return fn;
+
+  if (src.endsWith(';')) src += 'undefined';
+
+  const script = new vm.Script(src);
+
+  return ($, _$, i) => {
+    sandbox.$ = $;
+    sandbox._$ = _$;
+    sandbox.i = i;
+    return script.runInContext(context);
+  }
 };
