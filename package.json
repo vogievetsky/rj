@@ -1,6 +1,6 @@
 {
   "name": "rj",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "a JavaScript multi-tool",
   "engines": {
     "node": ">=6.0.0"
